@@ -2,29 +2,28 @@ import asyncio
 import json
 import socket
 import struct
-#from run_server import _CONFIG
+from settings.config import _CONFIG
 
 class Server:
     tcp_address = {
         "host": "127.0.0.1",
-        "port": 9999
+        "port": 9000
     }
     udp_address = {
         "host": "239.255.255.1",
         "port": 8888
     }
-    neighbor_nodes = {
-        "node": {"host": "", "port": ""}
-    }
 
     def connection_made(self, transport):
-        print('Connected\n', transport)
+        print('Server')
         self.transport = transport
+        #print('Send info about node', self.message)
+        #self.transport.sendto(self.message.encode())
 
     #server expects the client to request port and number of links
     def datagram_received(self, data, addr):
-        payload = self.dispatch_message(data)
-        print("Received with udp from: ", addr)
+        #payload = self.dispatch_message(data)
+        print("server datagram_received", addr)
         #self.discovery_info()
 
     #server expects other services to request stored information
@@ -32,6 +31,7 @@ class Server:
         print("Connected with udp")
         message = self.get_discovery_message()
         print('Request from client: host "{} and port {}'.format(message.get("host"), message.get("port")))
+        self.send_address((message.get("host"), message.get("port")))
 
     def get_discovery_message(self):
         sock = self.run_listener_udp()
@@ -54,3 +54,15 @@ class Server:
         else:
             print("Not discovery command")
         return payload
+
+    def send_address(self, client_addr):
+        nr_nodes = len(_CONFIG[3]["neighbor"])
+        message = {
+            "nodes": nr_nodes,
+            "host": self.tcp_address["host"],
+            "port": self.tcp_address["port"]
+        }
+        message = json.dumps(message).encode('utf-8')
+        loop = asyncio.get_event_loop()
+        task = asyncio.Task(loop.create_datagram_endpoint(Server, remote_addr=client_addr)
+        loop.run_until_complete(task)

@@ -7,14 +7,20 @@ class Client:
         "host": "127.0.0.1",
         "port": 9999
     }
-    udp_address = {
-        "host": "239.255.255.1",
-        "port": 8888
-    }
 
     def connection_made(self, transport):
-        self.transport = transport
-        self.transport_request(self.transport)
+        print("Client")
+        #self.transport = transport
+        #self.transport_request(self.transport)
+
+    def datagram_received(self, data, addr):
+        #payload = self.dispatch_message(data)
+        print("datagram_received: ", addr)
+
+    def connection_lost(self, exc):
+        print('closing transport', exc)
+        loop = asyncio.get_event_loop()
+        loop.stop()
 
     #client request to all servers port and number of links
     def transport_request(self, transport):
@@ -30,6 +36,7 @@ class Client:
         message = self.prepare_discovery_message()
         self.send_discovery(message)
         print("Sent discovery request")
+        self.wait_nodes_response()
 
     def send_discovery(self, message):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -44,6 +51,18 @@ class Client:
         }
         jsonMessage = json.dumps(message).encode('utf-8')
         return jsonMessage
+
+    def wait_nodes_response(self):
+        print("Waiting response from nodes...")
+        loop = asyncio.get_event_loop()
+        task = asyncio.Task(loop.create_datagram_endpoint(Client, local_addr=(self.tcp_address["host"], self.tcp_address["port"])))
+        transport, server = loop.run_until_complete(task)
+        try:
+            loop.run_forever()
+        finally:
+            transport.close()
+        loop.close()
+
 
     #client request some objects from maven
     #async def trasport_request():
