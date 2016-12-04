@@ -1,4 +1,6 @@
-from client.run_client import run_client
+from client import Client
+
 
 if __name__ == "__main__":
-    run_client()
+    client = Client()
+    client.run()
