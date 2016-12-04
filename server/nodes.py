@@ -42,7 +42,7 @@ class ServerNode(object):
         '''
         Runs a TCP server and returns an `asyncio.Task` instance.
         '''
-        t = asyncio.Task(self.loop.create_connection(
+        t = asyncio.Task(self.loop.create_server(
             lambda: NodeResponseTcpProtocol(self),
             self.host, self.port,
         ))
@@ -67,3 +67,4 @@ class ServerNode(object):
             self.run_tcp_server(),
             self.run_udp_multicast_server(),
         ]))
+        self.loop.run_forever()
