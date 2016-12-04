@@ -32,7 +32,7 @@ class ServerNode(object):
         '''
         return 'You said - {}'.format(client_data.decode())
 
-    def get_info_request_message(self, client_data):
+    def get_info_response_message(self, client_data):
         '''
         Returns a message to the client about the info node.
         '''
