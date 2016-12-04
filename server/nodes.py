@@ -8,7 +8,7 @@ from .protocols import NodeResponseUdpProtocol, NodeResponseTcpProtocol
 
 class ServerNode(object):
     '''
-    ServerNode is a unit of executable async code which can be distributed
+    ServerNode is an unit of executable async code which can be distributed
     to an arbitrary infrastructure.
     '''
     def __init__(
