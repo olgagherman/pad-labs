@@ -1,8 +1,8 @@
 import asyncio
 import logging
-import socket
-import struct
 
+
+from core.protocols import UdpMulticastProtocolMixin
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,20 +24,10 @@ class BaseNodeProtocol(object):
         LOGGER.error('Connection Lost %s', exc)
 
 
-class NodeResponseUdpProtocol(BaseNodeProtocol, asyncio.DatagramProtocol):
+class NodeResponseUdpProtocol(UdpMulticastProtocolMixin, BaseNodeProtocol, asyncio.DatagramProtocol):
     '''
     Protocol which implements listening of info packets from the clients via unicast
     '''
-    def __init__(self, node, udp_address_group, *args, **kwargs):
-        super().__init__(node, *args, **kwargs)
-        self.udp_address_group = udp_address_group
-
-    def init_multicast_transport(self, transport):
-        sock = transport.get_extra_info('socket')
-        group = socket.inet_aton('239.255.255.250')
-        mreq = struct.pack('4sL', group, socket.INADDR_ANY)
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-
     def connection_made(self, transport):
         self.init_multicast_transport(transport)
         self.transport = transport # pylint: disable=attribute-defined-outside-init
