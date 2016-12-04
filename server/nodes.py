@@ -30,13 +30,13 @@ class ServerNode(object):
         Returns a message for the client based on client's request contained in
         `client_data`.
         '''
-        return 'You said - {}'.format(client_data.decode())
+        return 'You said - {}'.format(client_data.decode()).encode()
 
     def get_info_response_message(self, client_data):
         '''
         Returns a message to the client about the info node.
         '''
-        return 'You said - {}'.format(client_data.decode())
+        return 'You said - {}'.format(client_data.decode()).encode()
 
     def run_tcp_server(self):
         '''
