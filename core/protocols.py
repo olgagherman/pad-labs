@@ -11,6 +11,11 @@ class UdpMulticastProtocolMixin(object):
     udp_group_address = UDP_GROUP_ADDRESS # Override this in constructor if needed
 
     def init_multicast_transport(self, transport):
+        '''
+        Updates transport to support UDP multicast.
+
+        Run this method from the `connection_made` method.
+        '''
         sock = transport.get_extra_info('socket')
         group = socket.inet_aton(self.udp_group_address)
         mreq = struct.pack('4sL', group, socket.INADDR_ANY)

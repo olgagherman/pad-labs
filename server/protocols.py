@@ -12,7 +12,7 @@ class BaseNodeProtocol(object):
     Base node Protocol.
 
     This base class provides some methods with default implementation.
-    `server` is an instance of `server.nodes.Node` to control the flow.
+    `server` is an instance of `server.nodes.ServerNode` to control the flow.
     '''
     def __init__(self, node, *args, **kwargs): # pylint: disable=unused-argument
         self.node = node

@@ -62,6 +62,9 @@ class ServerNode(object):
     def run(self):
         '''
         Entry point for the node
+
+        You may return just result of `asyncio.wait` from this method and run
+        `run_forever` from an external function.
         '''
         self.loop.run_until_complete(asyncio.wait([
             self.run_tcp_server(),
