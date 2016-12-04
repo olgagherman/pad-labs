@@ -30,3 +30,30 @@ SERVER_CONFIG = {
         "host": "127.0.0.1"
     }
 }
+
+LOGGING_CONFIG = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s | %(asctime)s | %(name)s:%(funcName)s | %(process)d | %(thread)d | %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'client': {
+            'level': 'DEBUG',
+            'handlers': ['console']
+        },
+        'server': {
+            'level': 'DEBUG',
+            'handlers': ['console']
+        },
+    }
+}
