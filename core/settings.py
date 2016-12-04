@@ -1,3 +1,6 @@
+UDP_GROUP_ADDRESS = '239.255.255.250'
+UDP_GROUP_PORT = '14141'
+
 SERVER_CONFIG = {
     1: {
         "neighbor": [2],
