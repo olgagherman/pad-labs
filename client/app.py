@@ -1,4 +1,5 @@
 import asyncio
+import socket
 
 from .protocols import (
     ClientRequestTcpProtocol, ClientRequestUdpProtocol, ClientResponseUdpProtocol
@@ -8,8 +9,8 @@ class Client(object):
     def __init__(
             self,
             loop,
-            udp_group_address=None, udp_group_port=None,
-            udp_address=None, udp_port=None,
+            udp_group_address='239.255.255.250', udp_group_port=14141,
+            udp_address='127.0.0.1', udp_port=14140,
             ):
         self.loop = loop
         self.udp_group_address = udp_group_address
@@ -27,6 +28,7 @@ class Client(object):
 
     def process_info_response(self, data):
         # data = data.decode('utf-8')
+        # print(data)
         pass
 
     def process_data_response(self, data):
@@ -44,18 +46,17 @@ class Client(object):
 
     def run_udp_server(self):
         t = asyncio.Task(self.loop.create_datagram_endpoint(
-            lambda: ClientResponseUdpProtocol(self), self.udp_address, self.udp_port,
+            lambda: ClientResponseUdpProtocol(self),
+            local_addr=(self.udp_address, self.udp_port),
         ))
         return t
 
     def run(self):
+        self.run_udp_server()
         multicast_task = asyncio.Task(self.loop.create_datagram_endpoint(
             lambda: ClientRequestUdpProtocol(self, self.udp_group_address),
-            '0.0.0.0', self.udp_group_port,
+            remote_addr=('0.0.0.0', self.udp_group_port),
+            family=socket.AF_INET,
         ))
-        unicast_task = self.run_udp_server()
-        self.loop.run_until_complete([
-            unicast_task,
-            multicast_task,
-        ])
+        self.loop.run_until_complete(multicast_task)
         self.loop.run_forever()
