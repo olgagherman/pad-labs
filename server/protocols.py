@@ -46,7 +46,8 @@ class NodeResponseUdpProtocol(BaseNodeProtocol, asyncio.DatagramProtocol):
         LOGGER.debug('Received %s from %s', data, addr)
         message = self.node.get_info_response_message(data)
         LOGGER.debug('Sending %s', message)
-        self.transport.sendto(message)
+        client_addr = ('127.0.0.1', 14140) # TODO: You should get this from client's message
+        self.transport.sendto(message, client_addr)
 
 
 class NodeResponseTcpProtocol(BaseNodeProtocol, asyncio.Protocol):
