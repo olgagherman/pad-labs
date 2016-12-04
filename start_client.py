@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.5
 import asyncio
-import logging
+import logging.config
 
 from client import Client
 from core.settings import LOGGING_CONFIG

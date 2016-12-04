@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.5
 import asyncio
-import logging
+import logging.config
 
 from server import ServerNode
 from core import settings
