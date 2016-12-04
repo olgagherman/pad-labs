@@ -1,4 +1,14 @@
-from client.run_client import run_client
+#!/usr/bin/env python3.5
+import asyncio
+import logging.config
+
+from client import Client
+from core.settings import LOGGING_CONFIG
+
+
+logging.config.dictConfig(LOGGING_CONFIG)
+
 
 if __name__ == "__main__":
-    run_client()
+    client = Client(asyncio.get_event_loop())
+    client.run()
