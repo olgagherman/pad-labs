@@ -1,6 +1,6 @@
-from .nodes import Node
+from .nodes import ServerNode
 
 
 __all__ = [
-    'Node',
+    'ServerNode',
 ]
