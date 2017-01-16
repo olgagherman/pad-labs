@@ -55,7 +55,7 @@ class Client(object):
         self.run_udp_server()
         multicast_task = asyncio.Task(self.loop.create_datagram_endpoint(
             lambda: ClientRequestUdpProtocol(self, self.udp_group_address),
-            remote_addr=('0.0.0.0', self.udp_group_port),
+            remote_addr=(self.udp_group_address, self.udp_group_port),
             family=socket.AF_INET,
         ))
         self.loop.run_until_complete(multicast_task)
