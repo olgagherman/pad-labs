@@ -1,3 +1,6 @@
+'''
+Common settings
+'''
 UDP_GROUP_ADDRESS = '239.255.255.250'
 UDP_GROUP_PORT = '14141'
 
@@ -39,7 +42,8 @@ LOGGING_CONFIG = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s | %(asctime)s | %(name)s:%(funcName)s | %(process)d | %(thread)d | %(message)s'
+            'format': '%(levelname)s | %(asctime)s | %(name)s:%(funcName)s | '
+                      '%(process)d | %(thread)d | %(message)s'
         },
     },
     'handlers': {
@@ -52,11 +56,15 @@ LOGGING_CONFIG = {
     'loggers': {
         'client': {
             'level': 'DEBUG',
-            'handlers': ['console']
+            'handlers': ['console'],
         },
         'server': {
             'level': 'DEBUG',
-            'handlers': ['console']
+            'handlers': ['console'],
+        },
+        '__main__': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
         },
     }
 }
