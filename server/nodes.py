@@ -13,11 +13,13 @@ class ServerNode(object):
     '''
     def __init__(
             self,
+            id,
             loop,
             udp_group_address, udp_group_port,
             neighbor,
             host, port,
         ):
+        self.id = id
         self.loop = loop
         self.udp_group_address = udp_group_address
         self.udp_group_port = udp_group_port
@@ -42,6 +44,7 @@ class ServerNode(object):
         '''
         Runs a TCP server and returns an `asyncio.Task` instance.
         '''
+        print("run tcp server {}".format(self.id))
         t = asyncio.Task(self.loop.create_server(
             lambda: NodeResponseTcpProtocol(self),
             self.host, self.port,
@@ -52,6 +55,7 @@ class ServerNode(object):
         '''
         Runs a UDP multicast server and returns an `asyncio.Task` instance.
         '''
+        print("run udp multicast server {}".format(self.id))
         t = asyncio.Task(self.loop.create_datagram_endpoint(
             lambda: NodeResponseUdpProtocol(self, self.udp_group_address),
             local_addr=('0.0.0.0', self.udp_group_port),
@@ -66,8 +70,4 @@ class ServerNode(object):
         You may return just result of `asyncio.wait` from this method and run
         `run_forever` from an external function.
         '''
-        self.loop.run_until_complete(asyncio.wait([
-            self.run_tcp_server(),
-            self.run_udp_multicast_server(),
-        ]))
-        self.loop.run_forever()
+        return asyncio.wait([self.run_tcp_server(), self.run_udp_multicast_server()])
