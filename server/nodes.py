@@ -4,6 +4,7 @@ Implementation of the serve nodes
 import logging
 import asyncio
 import socket
+import json
 
 from .protocols import NodeResponseUdpProtocol, NodeResponseTcpProtocol
 
@@ -43,7 +44,8 @@ class ServerNode(object):
         Returns a message to the client about the info node.
         '''
         LOGGER.debug('Node %s - processing datagram', self.id)
-        return 'You said - {}'.format(client_data.decode()).encode()
+        data = json.loads(client_data.decode('utf-8'))
+        return data['address'], data['port']
 
     def run_tcp_server(self):
         '''
