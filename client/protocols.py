@@ -1,10 +1,12 @@
 import asyncio
 import logging
+import json
+from twisted.internet import reactor
 
 from core.protocols import UdpMulticastProtocolMixin
 
 LOGGER = logging.getLogger(__name__)
-
+timeout = 2
 
 class BaseClientProtocol(object):
     '''
@@ -29,10 +31,10 @@ class ClientRequestUdpProtocol(UdpMulticastProtocolMixin, BaseClientProtocol, as
     '''
     def connection_made(self, transport):
         self.init_multicast_transport(transport)
-
-        message = self.client.get_info_request_message()
-        LOGGER.debug('Connection made. Transport %s, Sending - %s', transport, message)
-        transport.sendto(message)
+        message = self.client.get_info_request_message().decode('utf-8')
+        data = json.loads(message)
+        LOGGER.debug('Connection made. Transport %s, Sending - %s:%s', transport, data['address'], data['port'])
+        transport.sendto(message.encode('utf-8'))
         LOGGER.debug('Waiting for response')
         self.client.info_request_sent()
 
@@ -41,9 +43,16 @@ class ClientResponseUdpProtocol(BaseClientProtocol, asyncio.DatagramProtocol):
     '''
     Protocol which implements listening of info packets from nodes via unicast
     '''
+    def connection_made(self, transport):
+        self.timeout = reactor.callLater(timeout, self.time_out)
+
     def datagram_received(self, data, addr):
         LOGGER.debug('Received %s from %s', data, addr)
-        self.client.process_info_response(data)
+        node_info = self.client.process_info_response(data)
+
+    def time_out():
+        print("Time out")
+
 
 class ClientRequestTcpProtocol(BaseClientProtocol, asyncio.Protocol):
     '''
