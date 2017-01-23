@@ -1,6 +1,6 @@
 import asyncio
 import logging
-
+import json
 
 from core.protocols import UdpMulticastProtocolMixin
 
@@ -34,10 +34,15 @@ class NodeResponseUdpProtocol(UdpMulticastProtocolMixin, BaseNodeProtocol, async
 
     def datagram_received(self, data, addr):
         LOGGER.debug('Received %s from %s', data, addr)
-        message = self.node.get_info_response_message(data)
-        LOGGER.debug('Sending %s', message)
-        client_addr = ('127.0.0.1', 14140) # TODO: You should get this from client's message
-        self.transport.sendto(message, client_addr)
+        client_address, client_port = self.node.get_info_response_message(data)
+        message_to_send = json.dumps({
+            'address': self.node.host,
+            'port': self.node.port,
+            'links': len(self.node.neighbor)
+        }).encode('utf-8')
+        LOGGER.debug('Sending %s', message_to_send)
+        client_addr = (client_address, client_port)
+        self.transport.sendto(message_to_send, client_addr)
 
 
 class NodeResponseTcpProtocol(BaseNodeProtocol, asyncio.Protocol):
