@@ -1,9 +1,12 @@
 import asyncio
 import socket
+import json
 
 from .protocols import (
     ClientRequestTcpProtocol, ClientRequestUdpProtocol, ClientResponseUdpProtocol
 )
+
+NODE_INFO = dict()
 
 class Client(object):
     def __init__(
@@ -19,17 +22,21 @@ class Client(object):
         self.udp_port = udp_port
 
     def get_info_request_message(self):
-        message = 'Info Request'
-        return message.encode('utf-8')
+        message = json.dumps({
+            'address': self.udp_address,
+            'port': self.udp_port
+        }).encode('utf-8')
+        return message
 
     def get_data_request_message(self):
         message = 'Data Request'
         return message.encode('utf-8')
 
     def process_info_response(self, data):
-        # data = data.decode('utf-8')
-        # print(data)
-        pass
+        node_info = json.loads(data.decode('utf-8'))
+        NODE_INFO[len(NODE_INFO)] = dict()
+        NODE_INFO[len(NODE_INFO)] = node_info
+        return node_info
 
     def process_data_response(self, data):
         # data = data.decode('utf-8')
