@@ -46,7 +46,7 @@ class ClientRequestUdpProtocol(UdpMulticastProtocolMixin, BaseClientProtocol, as
         if bool(maven):
             loop = asyncio.get_event_loop()
             try:
-                task = self.client.run_tcp_server(self.client.udp_address, self.client.udp_port)
+                task = self.client.run_tcp_server(maven["address"], maven["port"])
                 loop.run_until_complete(task)
                 loop.run_forever()
             except Exception:
