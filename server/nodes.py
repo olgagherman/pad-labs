@@ -23,6 +23,7 @@ class ServerNode(object):
             udp_group_address, udp_group_port,
             neighbor,
             host, port,
+            data
         ):
         self.id = node_id
         self.loop = loop
@@ -31,13 +32,15 @@ class ServerNode(object):
         self.neighbor = neighbor
         self.host = host
         self.port = port
+        self.data = data
 
     def get_data_response_message(self, client_data):
         '''
         Returns a message for the client based on client's request contained in
         `client_data`.
         '''
-        return 'You said - {}'.format(client_data.decode()).encode()
+        message = self.serialize(self.data)
+        return message.encode('utf-8')
 
     def get_info_response_message(self, client_data):
         '''
@@ -46,6 +49,13 @@ class ServerNode(object):
         LOGGER.debug('Node %s - processing datagram', self.id)
         data = json.loads(client_data.decode('utf-8'))
         return data['address'], data['port']
+
+    def serialize(self, data):
+        """Transforms a model into a dictionary which can be dumped to JSON."""
+        result = dict()
+        for k,obj in data.items():
+            result[k] = json.dumps(obj)
+        return json.dumps(result)
 
     def run_tcp_server(self):
         '''
