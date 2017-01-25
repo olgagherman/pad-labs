@@ -1,12 +1,13 @@
 import asyncio
 import logging
 import json
-from twisted.internet import reactor
 
 from core.protocols import UdpMulticastProtocolMixin
 
 LOGGER = logging.getLogger(__name__)
-timeout = 2
+UDP_TRANSPORT = None
+TIMEOUT = 5
+TIMED_OUT = False
 
 class BaseClientProtocol(object):
     '''
@@ -35,23 +36,36 @@ class ClientRequestUdpProtocol(UdpMulticastProtocolMixin, BaseClientProtocol, as
         data = json.loads(message)
         LOGGER.debug('Connection made. Transport %s, Sending - %s:%s', transport, data['address'], data['port'])
         transport.sendto(message.encode('utf-8'))
+        self.client.loop.call_later(TIMEOUT, self.time_out)
         LOGGER.debug('Waiting for response')
-        self.client.info_request_sent()
+
+    def time_out(self):
+        LOGGER.debug("Time out!")
+        TIMED_OUT = True
+        maven = self.client.info_request_sent()
+        if bool(maven):
+            loop = asyncio.get_event_loop()
+            try:
+                task = self.client.run_tcp_server(self.client.udp_address, self.client.udp_port)
+                loop.run_until_complete(task)
+                loop.run_forever()
+            except Exception:
+                LOGGER.error("Cannot connect to maven")
+        else:
+            LOGGER.debug("No response from nodes")
+
 
 
 class ClientResponseUdpProtocol(BaseClientProtocol, asyncio.DatagramProtocol):
     '''
     Protocol which implements listening of info packets from nodes via unicast
     '''
-    def connection_made(self, transport):
-        self.timeout = reactor.callLater(timeout, self.time_out)
-
     def datagram_received(self, data, addr):
-        LOGGER.debug('Received %s from %s', data, addr)
-        node_info = self.client.process_info_response(data)
-
-    def time_out():
-        print("Time out")
+        if TIMED_OUT:
+            LOGGER.debug('Too late received %s from %s', data, addr)
+        else:
+            LOGGER.debug('Received %s from %s', data, addr)
+            node_info = self.client.process_info_response(data)
 
 
 class ClientRequestTcpProtocol(BaseClientProtocol, asyncio.Protocol):
