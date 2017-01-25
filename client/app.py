@@ -1,11 +1,12 @@
 import asyncio
 import socket
 import json
+import logging
 
 from .protocols import (
     ClientRequestTcpProtocol, ClientRequestUdpProtocol, ClientResponseUdpProtocol
 )
-
+LOGGER = logging.getLogger(__name__)
 NODE_INFO = dict()
 
 class Client(object):
@@ -34,8 +35,9 @@ class Client(object):
 
     def process_info_response(self, data):
         node_info = json.loads(data.decode('utf-8'))
-        NODE_INFO[len(NODE_INFO)] = dict()
-        NODE_INFO[len(NODE_INFO)] = node_info
+        position = len(NODE_INFO)
+        NODE_INFO[position] = dict()
+        NODE_INFO[position] = node_info
         return node_info
 
     def process_data_response(self, data):
@@ -43,7 +45,14 @@ class Client(object):
         pass
 
     def info_request_sent(self):
-        pass
+        LOGGER.debug('Selecting maven')
+        maven = dict()
+        max_links = 0
+        for key,node in NODE_INFO.items():
+            if node['links'] > max_links:
+                max_links = node['links']
+                maven = node
+        return maven
 
     def run_tcp_server(self, host, port):
         t = asyncio.Task(self.loop.create_connection(
@@ -63,7 +72,7 @@ class Client(object):
         multicast_task = asyncio.Task(self.loop.create_datagram_endpoint(
             lambda: ClientRequestUdpProtocol(self, self.udp_group_address),
             remote_addr=(self.udp_group_address, self.udp_group_port),
-            family=socket.AF_INET,
+            family=socket.AF_INET
         ))
         self.loop.run_until_complete(multicast_task)
         self.loop.run_forever()
