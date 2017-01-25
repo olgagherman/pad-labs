@@ -5,6 +5,7 @@ import logging.config
 
 from server import ServerNode
 from core import settings
+from core.models import Student
 
 
 logging.config.dictConfig(settings.LOGGING_CONFIG)
@@ -19,9 +20,19 @@ async def run_tasks(nodes):
         tasks.extend(pending)
     return tasks
 
+def create_objects():
+    result = dict()
+    for i in range(1,7):
+        tmp = dict()
+        for x in range(0,3):
+            obj = Student("Viorel", "FI-131", 9.5)
+            tmp[x] = obj.__dict__
+        result[i] = tmp
+    return result
 
 def main():
     loop = asyncio.get_event_loop()
+    nodes_data = create_objects()
     nodes = [
         ServerNode(
             node_id=x,
@@ -29,6 +40,7 @@ def main():
             udp_group_address=settings.UDP_GROUP_ADDRESS,
             udp_group_port=settings.UDP_GROUP_PORT,
             **settings.SERVER_CONFIG[x],
+            data = nodes_data[x]
         )
         for x in range(1,7)
     ]
